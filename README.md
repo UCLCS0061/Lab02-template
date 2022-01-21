@@ -49,14 +49,14 @@ If you wish to inspect the output of the full tests run you may pipe this comman
 (execute `man less` for a full manual of the less utility):
 
 ```sh
-$ pytest -v Lab01Tests.py | less
+$ pytest -v Lab02Tests.py | less
 ```
 
 You can also run a selection of tests associated with each task by adding the Pytest marker for each task to the Pytest
 command:
 
 ```sh
-$ pytest -v Lab01Tests.py -m task1
+$ pytest -v Lab02Tests.py -m task1
 ```
 The markers are defined in the test file and listed in `pytest.ini`.
 
@@ -65,7 +65,7 @@ Have a look at the test file to find out the function names of each test.
 For example the following command executes the very first test of Lab 1:
 
 ```sh
-$ pytest -v Lab01Tests.py -k test_petlib_present
+$ pytest -v Lab02Tests.py -k test_petlib_present
 ```
 
 The full documentation of pytest is [available here](http://pytest.org/latest/).
