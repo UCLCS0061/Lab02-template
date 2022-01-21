@@ -1,7 +1,7 @@
 ![GitHub Classroom Workflow](../../workflows/GitHub%20Classroom%20Workflow/badge.svg?branch=main)
 <img alt="points bar" align="right" height="36" src="../../blob/badges/.github/badges/points-bar.svg" />
 
-# COMP0061 -- Privacy Enhancing Technologies -- Lab 01
+# COMP0061 -- Privacy Enhancing Technologies -- Lab 02
 
 This lab will introduce the basics of Petlib, encryption, signatures, and an end-to-end encryption system.
 
