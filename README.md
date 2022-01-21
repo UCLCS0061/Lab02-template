@@ -3,7 +3,7 @@
 
 # COMP0061 -- Privacy Enhancing Technologies -- Lab 02
 
-This lab will introduce the basics of Petlib, encryption, signatures, and an end-to-end encryption system.
+This lab will introduce the basics of Engineering Mix Systems and Traffic Analysis.
 
 ### Structure of Labs
 The structure of all the labs will be similar: two Python files will be provided. 
