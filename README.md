@@ -96,7 +96,7 @@ questions in the comments of the `Lab02Code.py`.
 
 ## TASK 1 -- Check installation
 
-> Ensures that the key libraries may be loaded, and the code files are present. Nothing to do beyond ensuring this is the case.
+> Ensures that the key libraries have been loaded, and the code files are present. Nothing to do beyond ensuring this is the case.
 
 ## TASK 2 -- Build a simple 1-hop mix client
 
