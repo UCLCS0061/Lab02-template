@@ -8,7 +8,7 @@
       "output": "",
       "comparison": "included",
       "timeout": 10,
-      "points": 1
+      "points": 1.5
     },
     {
       "name": "task 2",
@@ -18,7 +18,7 @@
       "output": "",
       "comparison": "included",
       "timeout": 10,
-      "points": 1
+      "points": 1.5
     },
     {
       "name": "task 3",
@@ -28,7 +28,7 @@
       "output": "",
       "comparison": "included",
       "timeout": 10,
-      "points": 1
+      "points": 1.5
     },
     {
       "name": "task 4",
@@ -38,7 +38,7 @@
       "output": "",
       "comparison": "included",
       "timeout": 10,
-      "points": 1
+      "points": 1.5
     },
 
   ]
