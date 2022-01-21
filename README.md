@@ -92,161 +92,88 @@ All submissions will be checked by TAs for correctness and your final marks are 
 For full marks, make sure you have fully filled in any sections marked with `TODO` comments, including answering any
 questions in the comments of the `Lab01Code.py`.
 
-## TASK 1 -- Basic installation \[1 point\]
-> Ensure petlib is installed on the system
-> and also pytest. Ensure the lab code can 
-> be imported.
-
-### Hints
-- Execute the following command to ensure the tests run:
-
-```sh
-$ pytest -v Lab01Tests.py -m task1
-```
-- If everything is installed correctly the two selected tests should both pass without a problem, and without any 
-modification to the code file.
-This first task is meant to ensure everything is installed properly.
-If it fails, talk to a Lab TA.
-
-## TASK 2 -- Symmetric encryption using AES-GCM \[1 point\]
-> Implement encryption and decryption functions
-> that simply performs AES_GCM symmetric encryption
-> and decryption using the functions in `petlib.Cipher`.
-
-### Hints
-- This first task lets you explore how to use AES-GCM from petlib.
-You may run the tests for this task using:
-
-```sh
-$ pytest -v Lab01Tests.py -m task2
-```
-
-- Consider these imports:
-```python
-from os import urandom 
-from petlib.cipher import Cipher
-```
-
-- Note that `urandom` produces cryptographically strong bytes, which is handy for keys and initialisation vectors.
-
-- The petlib.cipher package provides two handy functions `quick_gcm_enc` and `quick_gcm_dec` that will help you define the encryption and decryption functions.
-
-- The documentation for petlib.cipher is [available here](http://petlib.readthedocs.org/en/latest/index.html#module-petlib-cipher).
 
 
-## TASK 3 -- Understand Elliptic Curve Arithmetic \[1 point\]
-> - Test if a point is on a curve.
-> - Implement Point addition.
-> - Implement Point doubling.
-> - Implement Scalar multiplication (double & add).
-> - Implement Scalar multiplication (Montgomery ladder).
-> 
-> *Must not use any of the `petlib.ec` functions*. Only `petlib.Bn`!
+## TASK 1 -- Check installation
 
-### Hints
-- The five (5) tests for this task run through:
+> Ensures that the key libraries may be loaded, and the code files are present. Nothing to do beyond ensuring this is the case.
 
-```sh
-$ pytest -v Lab01Tests.py -m task3
-```
+## TASK 2 -- Build a simple 1-hop mix client
 
-- petlib.bn provides facilities to do fast computations on `big numbers`.
+> You are provided the code of the inner decoding function of a simple, one-hop mix server. Your task is to write a function that encodes a message to be send through the mix.
 
-```python
-from petlib.bn import Bn
-```
+## Hints:
 
-- The documentation of petlib.bn provides ample examples of the use of each function to manipulate big numbers.
-You can find it [here](http://petlib.readthedocs.org/en/latest/index.html#module-petlib-bn)
+- You can run the tests just for this task by executing:
 
-- The documentation strings for each function provide guidance as to the algorithms you need to implement. 
+	py.test -v Lab02Tests.py -m task2
 
-- The tests provide you some guidance as to the inputs and outputs expected by each function.
+- Your objective is to complete the function `mix_client_one_hop`. This function takes as inputs a public key (an EC element) of the mix, an address and a message. It must then encode the message to be processed by the `mix_server_one_hop` in such a way that the mix will output a tuple of (address, message) to be routed to its final destination.
 
-- The lecture slides include the formulas for performing EC addition and doubling. Make use of them.
+- The message type is a Python NamedTuple already defined for you as `OneHopMixMessage`. The function `mix_client_one_hop` must return an object of this type. Such an object may be created simply by calling:
 
-- Note that the neutral element `(infinity)` is encoded in `(x, y)` coordinates as `(None, None)`. Make sure you handle this input correctly. Do you also output it correctly?
+	OneHopMixMessage(client_public_key, expected_mac, address_cipher, message_cipher)
+
+where the `client_public_key` is an EC point, the expected Hmac is an Hmac of the `address_cipher` and `message_cipher`, and those are AES Counter mode (AES-CTR) ciphertexts of the encoded address and message.
+
+- Study the function `mix_server_one_hop` that implements the one-hop mix. Take note of all the `petlib` cryptographic operations and checked performed in order to process a message. You will have to ensure they decode your message correctly.
+
+- The first element of a message is an ephemeral public key defined by the client (and the client knows its private part). The private key is used to derived a shared secret with the mix, using the mix public key. Study the code of the one-hop mix to examine the key derivation, and ensure your client mirrors it to generate messages that decode correctly.
+
+- Study the code of the mix in `mix_server_one_hop` to determine the cryptographic operations necessary to encrypt correctly the address and message, as well as producing a valid Hmac. A helper function `aes_ctr_enc_dec` is provided to help you encrypt/decrypt using AES Counter mode. If you are not familiar with [AES Counter mode have a look online](http://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_.28CTR.29).
+
+- An Hmac is a cryptographic checksum that can be used to ensure parts of a message were generated by the holder of a shared secret key. If you are unsure of what a message authentication code does, do check the [HMAC primitive on wikipedia](http://en.wikipedia.org/wiki/Hash-based_message_authentication_code). You can find functions to generate and check Hmac in `petlib.hmac`.
+
+## TASK 3 -- Build a n-hop mix client.
+
+> In this exercise you will be required to encode a message to be relayed by a cascade of mixes. Each of the mixes has a public key, and the messages is passed to each of the mixes in order before being output.
+>
+> Your task here is to complete the `mix_client_n_hop` so that it encodes an address and message to be relayed by a sequence of mixes in order (the sequence is implicit, the order of their public keys is given.)
+
+## Hints:
+
+- You can run the tests just for this task by executing:
+
+	py.test -v Lab02Tests.py -m task3
+
+- The key differences between the 1-hop mix and the n-hop mix message encoding relates to: (1) the use of a blinding factor to provide bit-wise unlikability of the public key associated with the message; (2) the inclusion of a sequence (list) of hmacs as the second part of the mix message; (3) the decryption of the hmacs (in addition to the address and message) at each step of mixing.
+
+- The output of the function `mix_client_n_hop` should be an `NHopMixMessage`. The first element is a public key, the second is a list of hmacs, the third is the encrypted address and the final one is the encrypted message. You can build such a structure using:
+
+	NHopMixMessage(client_public_key, hmacs, address_cipher, message_cipher)
+
+- Study the mix operation in `mix_server_n_hop`. You will notice that the mix derives a shared key, and then uses it to check the first hmac in the list against the rest of the ciphertext. You must ensure your client encoding passes this test.
+
+- Debugging tip: the blinding factor used to "change" the public key of each message makes this task quite complex. Ensure that the sequence of shared keys the client encoder derives is the same as the sequence of shared keys observed by each mix in order. If that sequence is different, then the rest of the decoding is very likely to fail.
+
+- This task is fiddly, and you are likely to see a number of hmac verification failures. Do not lose hope: systematically dump the inputs to your hmacs (using `print`) as well as the keys, to ensure the client and the servers hmac the same data under the same keys.
+
+## TASK 4 -- Simple Traffic Analysis / Statistical Disclosure.
+
+> In this exercise you will be required to recover the social contacts of a target user, that is sending messages through an anonymity system (traffic analysis). A trace of traffic is provided to your function, as well as the number of social contacts of the target. You should return your best guess about who the user 0 has sent messages to.
+
+## Hints:
+
+- You can run the tests just for this task by executing:
+
+	py.test -v Lab02Tests.py -m task4
+
+- There is no need to use `petlib` for this task. Using other Python facilities such as the `Counter` class (from `collections`) might be helpful to keep your answer short (but not necessary).
+
+- The trace provided is a list of tuples [(Senders, Receivers)]. Each item of the list represents one round of the anonymity system, the senders observed sending in this round, and the receivers observed receiving. The identifiers of the senders / receivers are just small integers.
+
+- Your task is to complete the function `analyze_trace` to return the identifiers of a number of receivers that are the friends (the target has sent messages to) of the target. The number of friends sought is provided as `target_number_of_friends`, and the identifier of the target sender is provided as `target` (by default 0). You must receive a the list of receivers that Alice is sending messages to.
+
+- Do study the function `generate_trace` that simulates a very simple anonymity system. It provides a good guide as to the types of data in the trace and their meaning, as well as a model you analysis can be based on.
+
+- Remember the insight from the Statistical Disclosure Attack: anonymity systems provide imperfect privacy. This is mainly due to the fact that when a target is sending its small number of contacts are more likely to be receiving than other users. You will need to turn this insight into an algorithm that finds those contacts.
+
+## TASK Q1 and Q2 -- Answer the questions with reference to the code you wrote.
+
+- Please include these as part of the Code file submitted, as a multi-line string, where the `TODO` indicates.
 
 
-## TASK 4 -- Standard ECDSA signatures \[1 point\]
-> - Implement a key / param generation 
-> - Implement ECDSA signature using `petlib.ecdsa`
-> - Implement ECDSA signature verification using `petlib.ecdsa`
-
-### Hints
-
-- The tests for this task run through:
-
-```sh
-$ pytest -v Lab01Tests.py -m task4
-```
-
-- This task lets you practice generating and verifying digital signatures. This is a vital skill, even if you do not know how digital signature work (we will actually study what is inside them later in this course).
-
-- Note, that `petlib.ecdsa` provides both facilities to generate and verify signatures, as well as detailed documentation on how to use these. See `do_ecdsa_sign` and `do_ecdsa_verify`.
-
-```python
-from hashlib import sha256
-from petlib.ec import EcGroup
-from petlib.ecdsa import do_ecdsa_sign, do_ecdsa_verify
-```
-
-- The documentation for `module-petlib-ecdsa` is [available here](http://petlib.readthedocs.org/en/latest/index.html#module-petlib-ecdsa). Do use it.
-
-- It is necessary to use a secure hash function to hash an input before signing or verifying it (self study: why is that?). Luckily, the hashlib Python library provides a number of secure hash functions, and a number of insecure ones (Question: which is which?).
 
 
-## TASK 5 -- Diffie-Hellman Key Exchange and Derivation \[2 point: 1 point for DHKE and 1 point for test coverage\]
-> - use Bob's public key to derive a shared key.
-> - Use Bob's public key to encrypt a message.
-> - Use Bob's private key to decrypt the message.
 
-### Hints
-- The tests for this task run through:
-    
-```
-$ pytest -v Lab01Tests.py -m task5
-```
-   
-- This time you may use the facilities in petlib.ec to implement an EC Diffie-Hellman exchange.
-The documentation [is here](http://petlib.readthedocs.org/en/latest/index.html#module-petlib-ec)
 
-- Also: have a look at the provided key generation function to guide the remaining of the implementation.
-
-- This task requires you to implement a simple hybrid encryption scheme, guided by the scheme presented in the slides. 
-In a nutshell you may assume that Alice and Bob are aware of each other's public keys, and use those to eventually
-derive a shared key.
-This shared key is eventually used to key an AES-GCM cipher to protect the integrity and confidentiality of a message.
-
-- You may assume that the public key passed to `dh_encrypt` is the public encryption key of the recipient, and the 
-`alice_sig` parameter is the signature key of Alice the sender.
-Conversely, the `priv` parameter of `dh_encrypt` is the recipient's (Bob) secret decryption key and `alice_ver` a public
-verification key for a signature scheme.
-
-- As part of this task you MUST implement a number of tests to ensure that your code is correct.
-Stubs for 3 such tests are provided, namely `test_encrypt`, `test_decrypt` (which are self-explanatory), and 
-`test_fails` which is meant to check for conditions under which the decryption must fail.
-At least these should be implemented in the code file, but feel free to implement more.
-
-- Your tests should run when you execute the following command, which produces a report on your test coverage.
-Ensure all lines of code are fully covered by the test regime!
-
-```
-$ pytest --cov-report html --cov Lab01Code Lab01Tests.py 
-```
-
-## TASK 6 -- Time EC scalar multiplication \[0 points\]
-> *Open Task - Optional*
-> 
-> Time your implementations of scalar multiplication
->  (use time.clock() for measurements) for different 
->  scalar sizes
-
-### Hints
-- If you made it so far, talk to a TA. 
-
-- If you are set on answering this question, you must time your execution of scalar multiplication to investigate timing
-side channels. 
-
-- Once you have observed timing channels that may leak secrets, go back and fix the scalar multiplication code to run in
-constant time.
