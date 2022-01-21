@@ -106,7 +106,7 @@ questions in the comments of the `Lab02Code.py`.
 
 - You can run the tests just for this task by executing:
 
-	py.test -v Lab02Tests.py -m task2
+	pytest -v Lab02Tests.py -m task2
 
 - Your objective is to complete the function `mix_client_one_hop`. This function takes as inputs a public key (an EC element) of the mix, an address and a message. It must then encode the message to be processed by the `mix_server_one_hop` in such a way that the mix will output a tuple of (address, message) to be routed to its final destination.
 
@@ -134,7 +134,7 @@ where the `client_public_key` is an EC point, the expected Hmac is an Hmac of th
 
 - You can run the tests just for this task by executing:
 
-	py.test -v Lab02Tests.py -m task3
+	pytest -v Lab02Tests.py -m task3
 
 - The key differences between the 1-hop mix and the n-hop mix message encoding relates to: (1) the use of a blinding factor to provide bit-wise unlikability of the public key associated with the message; (2) the inclusion of a sequence (list) of hmacs as the second part of the mix message; (3) the decryption of the hmacs (in addition to the address and message) at each step of mixing.
 
@@ -156,7 +156,7 @@ where the `client_public_key` is an EC point, the expected Hmac is an Hmac of th
 
 - You can run the tests just for this task by executing:
 
-	py.test -v Lab02Tests.py -m task4
+	pytest -v Lab02Tests.py -m task4
 
 - There is no need to use `petlib` for this task. Using other Python facilities such as the `Counter` class (from `collections`) might be helpful to keep your answer short (but not necessary).
 
