@@ -41,9 +41,7 @@ setup or even having Python 3 installed.
 Unit tests are run from the command line by executing the command:
 
 ```sh
-$ pytest -v Lab0
-
-2Tests.py
+$ pytest -v Lab02Tests.py
 ```
 
 Note the `-v` flag toggles a more verbose output.
